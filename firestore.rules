@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if the user is an admin
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email.lower() == "mitch363@googlemail.com" ||
+        request.auth.token.email.lower() == "mitch363@gmail.com" ||
+        request.auth.token.email.lower() == "mitchellwardstudios@gmail.com"
+      );
+    }
+
+    // Artworks Collection
+    match /artworks/{artworkId} {
+      // Anyone can read the artwork gallery
+      allow read: if true;
+      // Only admins can upload, edit details, or delete artwork
+      allow create, delete: if isAdmin();
+      // Admins can fully update. Guests can ONLY update the `isSold` field to true (via checkout)
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isSold']) &&
+        request.resource.data.isSold == true
+      );
+    }
+    
+    // Orders Collection
+    match /orders/{orderId} {
+      // Anyone can submit a new order request
+      allow create: if true;
+      // Only admins can view, update, or delete the orders
+      allow read, update, delete: if isAdmin();
+    }
+    
+    // Customers Collection
+    match /customers/{emailId} {
+      // Allow a user to read/write their own profile if authenticated, or allow write during guest checkout
+      // emailId is the lowercase email address
+      allow get: if isAdmin() || (request.auth != null && request.auth.token.email.lower() == emailId);
+      allow write: if isAdmin() || (request.auth == null) || (request.auth != null && request.auth.token.email.lower() == emailId);
+
+      // Only admins can list all customers or delete them
+      allow list, delete: if isAdmin();
+    }
+    
+    // General CMS / Settings
+    match /settings/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

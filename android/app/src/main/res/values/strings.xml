@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Art Gallery &amp; Mockup Viewer</string>
+    <string name="title_activity_main">Art Gallery &amp; Mockup Viewer</string>
+    <string name="package_name">com.mitchellward.artgallery</string>
+    <string name="custom_url_scheme">com.mitchellward.artgallery</string>
+    <string name="default_web_client_id">326050299607-fpb7npv1pfdgl9das62ovr4us43k1m0s.apps.googleusercontent.com</string>
+</resources>
