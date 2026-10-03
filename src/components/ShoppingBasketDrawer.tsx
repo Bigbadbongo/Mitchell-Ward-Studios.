@@ -33,9 +33,9 @@ export default function ShoppingBasketDrawer() {
 
   const confirmCheckout = () => {
     handleCheckout({ 
-      name: "Guest", 
-      email: "No Email Provided", 
-      address: "Address via Stripe", 
+      name: userName || "Guest", 
+      email: userEmail || "No Email Provided", 
+      address: userAddress || "Address via Stripe", 
       subscribe 
     });
     setCheckoutStep(false);

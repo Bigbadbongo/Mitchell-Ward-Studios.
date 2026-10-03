@@ -238,3 +238,41 @@ exports.getDigitalDownloadLink = functions.https.onCall(async (request) => {
     throw new functions.https.HttpsError('internal', 'An internal error occurred.');
   }
 });
+
+exports.getCustomerDigitalOrders = functions.https.onCall(async (request) => {
+  const data = request.data || {};
+  const { email } = data;
+
+  if (!email) {
+    throw new functions.https.HttpsError('invalid-argument', 'Email is required.');
+  }
+
+  try {
+    const snapshot = await db.collection('orders')
+      .where('customerEmail', '==', email.toLowerCase())
+      .where('status', '==', 'paid')
+      .get();
+
+    const items = [];
+    snapshot.forEach(doc => {
+      const order = doc.data();
+      if (order.items) {
+        order.items.forEach(item => {
+          if (item.size === 'Digital Download' || item.includeDigitalCopy === true) {
+            items.push({
+              orderId: doc.id,
+              artworkId: item.id,
+              title: item.title + (item.includeDigitalCopy && item.size !== 'Digital Download' ? ' (Digital Copy)' : ''),
+              date: order.date
+            });
+          }
+        });
+      }
+    });
+
+    return { items };
+  } catch (error) {
+    console.error('Error fetching digital orders:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to retrieve digital orders.');
+  }
+});

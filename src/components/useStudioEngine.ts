@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Share } from "@capacitor/share";
 import { useUI } from "../context/UIContext";
 import { useAuth } from "../context/AuthContext";
@@ -95,9 +95,41 @@ export default function useStudioEngine() {
   const [uploadingToCloud, setUploadingToCloud] = useState(false);
 
 
-  // Removed local basket useEffect (handled by CartContext)
+  // 1. Handle Stripe Checkout Return Query Parameters (?checkout=success / ?checkout=cancelled)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const checkoutStatus = urlParams.get("checkout");
+    if (checkoutStatus === "success") {
+      const orderId = urlParams.get("order_id");
+      setBasket([]);
+      localStorage.removeItem("studio_basket");
+      triggerToast(orderId ? `Order #${orderId} confirmed! Thank you.` : "Order successfully placed! Thank you.");
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    } else if (checkoutStatus === "cancelled") {
+      triggerToast("Checkout was cancelled.");
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+  }, []);
 
-  // Removed user profile functions (handled by AuthContext)
+  // 2. Handle Smart Share Artwork Deep Links (?art=ID)
+  useEffect(() => {
+    if (typeof window === "undefined" || inventory.length === 0) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const artId = urlParams.get("art");
+    if (artId) {
+      const targetArt = inventory.find(a => a.id === artId);
+      if (targetArt) {
+        setSelectedArtwork(targetArt);
+        setMenuState("detail");
+        if (targetArt.category === "Photography") setPhotoSize("A3 Print");
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    }
+  }, [inventory]);
 
   const handleSaveRename = async () => {
     if (!editFolder || !editFolder.newName.trim() || editFolder.newName === editFolder.oldName) {
@@ -324,6 +356,19 @@ export default function useStudioEngine() {
   const handleSecondaryFileChange = (e) => { if (e.target.files[0]) setSelectedSecondaryFile(e.target.files[0]); };
 
   const handlePublishUpload = async () => {
+    if (!selectedFile) {
+      alert("Please select an artwork display image before publishing.");
+      return;
+    }
+    if (!uploadTitle.trim()) {
+      alert("Please provide a title for the artwork.");
+      return;
+    }
+    if (uploadType === "Paintings" && (!uploadPrice || Number(uploadPrice) <= 0)) {
+      alert("Please specify a valid price for the painting.");
+      return;
+    }
+
     try {
       setUploadingToCloud(true);
       await uploadArtworkService({
@@ -340,7 +385,8 @@ export default function useStudioEngine() {
         uploadCatName
       });
       setIsUploading(false); setUploadTitle(""); setUploadDesc(""); setUploadPrice(""); setUploadWidth(""); setUploadHeight(""); setSelectedFile(null); setSelectedPrintFile(null); setSelectedSecondaryFile(null);
-    } catch (err) { alert("Error uploading item: " + err.message); } 
+      triggerToast("Artwork published successfully!");
+    } catch (err: any) { alert("Error uploading item: " + err.message); } 
     finally { setUploadingToCloud(false); }
   };
 

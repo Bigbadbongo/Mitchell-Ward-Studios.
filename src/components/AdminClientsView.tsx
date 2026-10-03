@@ -134,8 +134,8 @@ export default function AdminClientsView({ setMenuState }: any) {
 
   const downloadCSV = async () => {
     try {
-      const subSnap = await getDocs(query(collection(db, "subscribers")));
-      const emails = subSnap.docs.map(doc => doc.data().email).join("\n");
+      const subSnap = await getDocs(query(collection(db, "newsletter")));
+      const emails = subSnap.docs.map(doc => doc.data().email || doc.id).join("\n");
       
       const csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent("Email\n" + emails);
       const a = document.createElement('a');

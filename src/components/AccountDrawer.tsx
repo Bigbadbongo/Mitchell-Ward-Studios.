@@ -28,31 +28,42 @@ export default function AccountDrawer() {
   const fetchDigitalOrders = async (email: string) => {
     setIsLoadingOrders(true);
     try {
-      const q = query(
-        collection(db, "orders"), 
-        where("customerEmail", "==", email.toLowerCase()),
-        where("status", "==", "paid")
-      );
-      const snapshot = await getDocs(q);
-      const items: any[] = [];
-      snapshot.forEach(doc => {
-        const order = doc.data();
-        if (order.items) {
-          order.items.forEach((item: any) => {
-            if (item.size === "Digital Download" || item.includeDigitalCopy === true) {
-              items.push({
-                orderId: doc.id,
-                artworkId: item.id,
-                title: item.title + (item.includeDigitalCopy && item.size !== "Digital Download" ? " (Digital Copy)" : ""),
-                date: order.date
-              });
-            }
-          });
-        }
-      });
-      setDigitalOrders(items);
+      const getDigitalOrders = httpsCallable(functions, 'getCustomerDigitalOrders');
+      const result = await getDigitalOrders({ email: email.toLowerCase() });
+      const data = result.data as any;
+      if (data && Array.isArray(data.items)) {
+        setDigitalOrders(data.items);
+        return;
+      }
     } catch (err) {
-      console.error("Failed to fetch digital orders", err);
+      console.warn("Cloud function getCustomerDigitalOrders failed, trying client query:", err);
+      try {
+        const q = query(
+          collection(db, "orders"), 
+          where("customerEmail", "==", email.toLowerCase()),
+          where("status", "==", "paid")
+        );
+        const snapshot = await getDocs(q);
+        const items: any[] = [];
+        snapshot.forEach(doc => {
+          const order = doc.data();
+          if (order.items) {
+            order.items.forEach((item: any) => {
+              if (item.size === "Digital Download" || item.includeDigitalCopy === true) {
+                items.push({
+                  orderId: doc.id,
+                  artworkId: item.id,
+                  title: item.title + (item.includeDigitalCopy && item.size !== "Digital Download" ? " (Digital Copy)" : ""),
+                  date: order.date
+                });
+              }
+            });
+          }
+        });
+        setDigitalOrders(items);
+      } catch (clientErr) {
+        console.error("Failed to fetch digital orders", clientErr);
+      }
     } finally {
       setIsLoadingOrders(false);
     }

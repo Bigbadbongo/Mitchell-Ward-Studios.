@@ -168,7 +168,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
           totalSpend: increment(basketSubtotal + basketShipping)
         }, { merge: true });
         
-        // Note: subscribeToNewsletter is omitted here to avoid breaking scope as it's not defined
+        if (checkoutData?.subscribe) {
+          await setDoc(doc(db, "newsletter", finalEmail.toLowerCase()), {
+            email: finalEmail.toLowerCase(),
+            subscribedAt: new Date().toISOString()
+          }, { merge: true });
+        }
       }
 
       triggerToast("Redirecting to Secure Checkout...");

@@ -41,6 +41,18 @@ service cloud.firestore {
       allow list, delete: if isAdmin();
     }
     
+    // Sales Ledger Collection
+    match /sales_ledger/{orderId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Newsletter Subscribers
+    match /newsletter/{emailId} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
     // General CMS / Settings
     match /settings/{document=**} {
       allow read: if true;

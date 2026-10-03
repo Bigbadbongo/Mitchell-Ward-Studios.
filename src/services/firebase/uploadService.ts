@@ -18,8 +18,18 @@ export const uploadArtworkService = async ({
 }: any) => {
   let imageUrl = "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?auto=format&fit=crop&w=300&q=80";
   let thumbnailUrl = "";
+  let imageAspectRatio = 1;
   
   if (selectedFile) {
+    try {
+      const bitmap = await createImageBitmap(selectedFile);
+      if (bitmap.width && bitmap.height) {
+        imageAspectRatio = bitmap.width / bitmap.height;
+      }
+    } catch (e) {
+      // Fallback if createImageBitmap is unsupported
+    }
+
     const displayOptions = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, fileType: "image/jpeg" };
     const compressedDisplay = await imageCompression(selectedFile, displayOptions);
     const displayRef = ref(storage, "studio/" + Date.now() + ".jpg");
@@ -44,16 +54,30 @@ export const uploadArtworkService = async ({
 
   let secondaryUrl = "";
   if (uploadType === "Paintings" && selectedSecondaryFile) {
-    const extension = selectedSecondaryFile.name.split('.').pop() || "png";
-    const fileRef = ref(storage, "studio_secondary/" + Date.now() + "_" + Math.random().toString(36).substring(7) + "." + extension);
-    await uploadBytes(fileRef, selectedSecondaryFile);
-    secondaryUrl = await getDownloadURL(fileRef);
+    try {
+      const secOptions = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, fileType: "image/jpeg" };
+      const compressedSec = await imageCompression(selectedSecondaryFile, secOptions);
+      const fileRef = ref(storage, "studio_secondary/" + Date.now() + ".jpg");
+      await uploadBytes(fileRef, compressedSec);
+      secondaryUrl = await getDownloadURL(fileRef);
+    } catch (err) {
+      // Fallback direct upload if compression fails
+      const extension = selectedSecondaryFile.name.split('.').pop() || "jpg";
+      const fileRef = ref(storage, "studio_secondary/" + Date.now() + "." + extension);
+      await uploadBytes(fileRef, selectedSecondaryFile);
+      secondaryUrl = await getDownloadURL(fileRef);
+    }
   }
 
   const wVal = Number(uploadWidth) || 0;
   const hVal = Number(uploadHeight) || 0;
-  const widthCm = uploadUnit === "m" ? wVal * 100 : wVal;
-  const heightCm = uploadUnit === "m" ? hVal * 100 : hVal;
+  let widthCm = uploadUnit === "m" ? wVal * 100 : wVal;
+  let heightCm = uploadUnit === "m" ? hVal * 100 : hVal;
+
+  if (uploadType === "Photography" && (!widthCm || !heightCm)) {
+    widthCm = imageAspectRatio >= 1 ? 42 : 29.7;
+    heightCm = imageAspectRatio >= 1 ? 29.7 : 42;
+  }
   
   const formattedSize = wVal > 0 && hVal > 0 
     ? `${uploadWidth}${uploadUnit} x ${uploadHeight}${uploadUnit}` 
@@ -70,6 +94,7 @@ export const uploadArtworkService = async ({
     size: formattedSize,
     widthCm: widthCm || null,
     heightCm: heightCm || null,
+    aspectRatio: imageAspectRatio,
     medium: uploadType === "Paintings" ? "Acrylic Canvas" : "Archival Print",
     timestamp: Date.now()
   });

@@ -2,28 +2,33 @@ import React from "react";
 
 // Helper function to parse physical size (same logic as detail view)
 function getArtworkDimensions(artwork: any): { width: number; height: number } {
-  const defaultSize = { width: 100, height: 100 };
-  if (!artwork.widthCm || !artwork.heightCm) {
-    // Attempt to parse from size string if dedicated fields are missing
-    try {
-      const sizeStr = String(artwork.size || "").toLowerCase().replace(/\s+/g, '');
-      const parts = sizeStr.split(/x|by|\*|,/);
-      const parseDim = (s: string) => {
-        const m = s.match(/([\d.]+)(m|cm)?/);
-        if (!m) return null;
-        let val = parseFloat(m[1]);
-        if (m[2] === 'm') val *= 100;
-        return val;
-      };
-      if (parts.length >= 2) {
-        const w = parseDim(parts[0]);
-        const h = parseDim(parts[1]);
-        if (w && h) return { width: w, height: h };
-      }
-    } catch (e) {}
-    return defaultSize;
+  if (artwork.widthCm && artwork.heightCm) {
+    return { width: parseFloat(artwork.widthCm), height: parseFloat(artwork.heightCm) };
   }
-  return { width: parseFloat(artwork.widthCm), height: parseFloat(artwork.heightCm) };
+
+  if (artwork.aspectRatio && typeof artwork.aspectRatio === "number" && artwork.aspectRatio > 0) {
+    return { width: artwork.aspectRatio * 100, height: 100 };
+  }
+
+  const defaultSize = { width: 100, height: 100 };
+  // Attempt to parse from size string if dedicated fields are missing
+  try {
+    const sizeStr = String(artwork.size || "").toLowerCase().replace(/\s+/g, '');
+    const parts = sizeStr.split(/x|by|\*|,/);
+    const parseDim = (s: string) => {
+      const m = s.match(/([\d.]+)(m|cm)?/);
+      if (!m) return null;
+      let val = parseFloat(m[1]);
+      if (m[2] === 'm') val *= 100;
+      return val;
+    };
+    if (parts.length >= 2) {
+      const w = parseDim(parts[0]);
+      const h = parseDim(parts[1]);
+      if (w && h) return { width: w, height: h };
+    }
+  } catch (e) {}
+  return defaultSize;
 }
 
 export default function ArtworkGridView({
