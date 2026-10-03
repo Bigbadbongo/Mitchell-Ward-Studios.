@@ -1,11 +1,10 @@
 import React from "react";
 import { CheckCircle, Archive, Settings } from "lucide-react";
-import { useInventory } from "../context/InventoryContext";
-import useStudioEngine from "./useStudioEngine";
 
-export default function AdminArtworkListView() {
-  const { adminListToRender } = useInventory();
-  const { setAdminSelectedArt } = useStudioEngine();
+export default function AdminArtworkListView({
+  adminListToRender,
+  setAdminSelectedArt
+}: any) {
   return (
     <div className="space-y-4 animate-in fade-in">
       {adminListToRender.length === 0 ? (
@@ -13,11 +12,14 @@ export default function AdminArtworkListView() {
           Folder is empty.
         </div>
       ) : (
-        adminListToRender.map(art => (
-          <div 
+        adminListToRender.map((art: any) => (
+          <button 
             key={art.id} 
-            onClick={() => setAdminSelectedArt(art)} 
-            className={"bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm cursor-pointer hover:border-[#2A0845] transition-all " + (((art.category === 'Paintings' && art.isSold) || (art.category === 'Photography' && art.isVaulted)) ? 'border-stone-200 bg-stone-50' : 'border-stone-200')}
+            onClick={() => {
+              console.log("Admin clicked art:", art.title);
+              setAdminSelectedArt(art);
+            }}
+            className={"w-full text-left bg-white p-3 rounded-xl border flex justify-between items-center shadow-sm cursor-pointer hover:border-[#2A0845] transition-all " + (((art.category === 'Paintings' && art.isSold) || (art.category === 'Photography' && art.isVaulted)) ? 'border-stone-200 bg-stone-50' : 'border-stone-200')}
           >
             <div className="flex items-center gap-3 w-full">
               <div className="relative shrink-0">
@@ -37,7 +39,7 @@ export default function AdminArtworkListView() {
               </div>
               <Settings className="w-4 h-4 text-stone-300 shrink-0" />
             </div>
-          </div>
+          </button>
         ))
       )}
     </div>

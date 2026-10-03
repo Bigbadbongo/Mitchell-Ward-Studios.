@@ -56,6 +56,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
       setMenuState('main'); 
     }
     else if (menuState === 'clients') setMenuState('admin');
+    else if (menuState === 'orders') setMenuState('admin');
     else if (menuState === 'admin_collections') setMenuState('admin');
     else if (menuState === 'admin_list') setMenuState('admin_collections');
     else if (menuState === 'detail') {

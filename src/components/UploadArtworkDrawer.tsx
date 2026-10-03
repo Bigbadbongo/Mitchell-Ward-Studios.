@@ -1,18 +1,32 @@
 import React from "react";
 import { X, Upload } from "lucide-react";
-import { useInventory } from "../context/InventoryContext";
-import useStudioEngine from "./useStudioEngine";
 
-export default function UploadArtworkDrawer() {
-  const { paintCats, photoCats } = useInventory();
-  const {
-    isUploading, setIsUploading, uploadType, uploadTitle, setUploadTitle, 
-    uploadCatName, setUploadCatName, 
-    uploadWidth, setUploadWidth, uploadHeight, setUploadHeight, 
-    uploadUnit, setUploadUnit, uploadPrice, setUploadPrice, uploadDesc, setUploadDesc, 
-    handleFileChange, handlePrintFileChange, handleSecondaryFileChange,
-    uploadingToCloud, handlePublishUpload
-  } = useStudioEngine();
+export default function UploadArtworkDrawer({
+  isUploading,
+  setIsUploading,
+  uploadType,
+  uploadTitle,
+  setUploadTitle,
+  uploadCatName,
+  setUploadCatName,
+  paintCats,
+  photoCats,
+  uploadWidth,
+  setUploadWidth,
+  uploadHeight,
+  setUploadHeight,
+  uploadUnit,
+  setUploadUnit,
+  uploadPrice,
+  setUploadPrice,
+  uploadDesc,
+  setUploadDesc,
+  handleFileChange,
+  handlePrintFileChange,
+  handleSecondaryFileChange,
+  uploadingToCloud,
+  handlePublishUpload
+}: any) {
   if (!isUploading) return null;
 
   return (
@@ -34,7 +48,7 @@ export default function UploadArtworkDrawer() {
             <label className="text-[10px] font-bold text-slate-500 uppercase">Folder</label>
             <select value={uploadCatName} onChange={e => setUploadCatName(e.target.value)} className="w-full p-3 mt-1 text-sm border border-stone-200 rounded-xl outline-none focus:border-[#2A0845] bg-white">
               <option value="Unassigned">-- Unassigned --</option>
-              {(uploadType === "Paintings" ? paintCats : photoCats).map(cat => (
+              {(uploadType === "Paintings" ? paintCats : photoCats).map((cat: string) => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>

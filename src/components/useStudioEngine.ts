@@ -51,7 +51,8 @@ export default function useStudioEngine() {
     currentActiveFolderList,
     filteredArtworks,
     adminFilteredArtworks,
-    adminListToRender
+    adminListToRender,
+    isLoading
   } = useInventory();
   const [selectedArtwork, setSelectedArtwork] = useState(null);
   const [chosenFrame, setChosenFrame] = useState("None");
@@ -66,6 +67,12 @@ export default function useStudioEngine() {
   // Removed local UI state for drawers (handled by UIContext)
   const [adminSelectedArt, setAdminSelectedArt] = useState(null);
   const [isCurating, setIsCurating] = useState(false);
+  const [curationNotes, setCurationNotes] = useState<string | null>(null);
+
+  const handleSelectArtwork = (art: any) => {
+    setCurationNotes(null);
+    setSelectedArtwork(art);
+  };
 
   // Removed local toast state (handled by UIContext)
   
@@ -192,8 +199,8 @@ export default function useStudioEngine() {
     }
   };
 
-  const handleAddToBasket = () => {
-    cartHandleAddToBasket(selectedArtwork, photoPrices, photoSize, shippingConfig, chosenFrame);
+  const handleAddToBasket = (includeDigitalCopy: boolean = false) => {
+    cartHandleAddToBasket(selectedArtwork, photoPrices, photoSize, shippingConfig, chosenFrame, includeDigitalCopy);
   };
 
   const handleSmartShare = async () => {
@@ -240,25 +247,69 @@ export default function useStudioEngine() {
     }
   };
 
-  const handleSurpriseMe = (category) => {
+  const handleSurpriseMe = async (category: string) => {
     setIsCurating(true);
-    setTimeout(() => {
-      const availableArt = inventory.filter(art => {
-        if (art.category !== category) return false;
-        if (category === "Paintings" && art.isSold) return false;
-        if (category === "Photography" && art.isVaulted) return false;
-        return true;
-      });
-      if (availableArt.length > 0) {
-        const randomArt = availableArt[Math.floor(Math.random() * availableArt.length)];
-        setSelectedArtwork(randomArt); setChosenFrame("None"); setSelectedSubCategory(null); 
-        if (randomArt.category === "Photography") setPhotoSize("A3 Print");
-        setMenuState("detail");
-      } else {
-        alert("No active artwork available in this category.");
-      }
+    setCurationNotes(null);
+
+    const availableArt = inventory.filter(art => {
+      if (art.category !== category) return false;
+      if (category === "Paintings" && art.isSold) return false;
+      if (category === "Photography" && art.isVaulted) return false;
+      return true;
+    });
+
+    if (availableArt.length === 0) {
+      alert("No active artwork available in this category.");
       setIsCurating(false);
-    }, 1200); 
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/curate-artwork", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mood: "inspirational gallery highlight",
+          stylePreference: category,
+          catalog: availableArt.map(art => ({
+            id: art.id,
+            title: art.title || "Untitled",
+            artist: art.artist || "Mitchell Ward",
+            description: art.description || "",
+            medium: art.medium || (category === "Paintings" ? "Acrylic Canvas" : "Archival Print"),
+            category: art.category,
+            style: art.subcategory || art.style || "Studio"
+          }))
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if ((data.status === "success" || data.status === "fallback") && data.selectedId) {
+          const chosenArt = availableArt.find(a => a.id === data.selectedId) || availableArt[0];
+          setSelectedArtwork(chosenArt);
+          setChosenFrame(data.framePreference || "Oak");
+          setSelectedSubCategory(null);
+          if (chosenArt.category === "Photography") setPhotoSize("A3 Print");
+          if (data.curationNotes) setCurationNotes(data.curationNotes);
+          setMenuState("detail");
+          setIsCurating(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("AI Curation endpoint error, falling back to local curation:", err);
+    }
+
+    // Local fallback curation if endpoint is unreachable or errors
+    const randomArt = availableArt[Math.floor(Math.random() * availableArt.length)];
+    setSelectedArtwork(randomArt);
+    setChosenFrame("Oak");
+    setSelectedSubCategory(null);
+    if (randomArt.category === "Photography") setPhotoSize("A3 Print");
+    setCurationNotes(`Curated to anchor and elevate your space. This striking piece, "${randomArt.title}", harmonizes bold studio composition with refined texture.`);
+    setMenuState("detail");
+    setIsCurating(false);
   };
 
   const openUploadModal = (category) => { 
@@ -303,9 +354,9 @@ export default function useStudioEngine() {
     inventory, setInventory, paintCats, setPaintCats, photoCats, setPhotoCats, photoPrices, setPhotoPrices,
     localPrices, setLocalPrices, editFolder, setEditFolder, newFolders, setNewFolders,
     studioBio, setStudioBio, studioEmail, setStudioEmail, menuState, setMenuState, activeCategory, setActiveCategory,
-    selectedSubCategory, setSelectedSubCategory, selectedArtwork, setSelectedArtwork, chosenFrame, setChosenFrame, basket, setBasket,
+    selectedSubCategory, setSelectedSubCategory, selectedArtwork, setSelectedArtwork: handleSelectArtwork, chosenFrame, setChosenFrame, basket, setBasket,
     isBasketOpen, setIsBasketOpen, isAccountOpen, setIsAccountOpen, isStudioPanelOpen, setIsStudioPanelOpen,
-    isAdminSettingsOpen, setIsAdminSettingsOpen, adminSelectedArt, setAdminSelectedArt, isCurating, setIsCurating, photoSize, setPhotoSize,
+    isAdminSettingsOpen, setIsAdminSettingsOpen, adminSelectedArt, setAdminSelectedArt, isCurating, setIsCurating, curationNotes, setCurationNotes, photoSize, setPhotoSize,
     clickCount, setClickCount, isAdmin, setIsAdmin, showPinPrompt, setShowPinPrompt, authError, setAuthError, authEmail, setAuthEmail, authPassword, setAuthPassword, adminSignIn, adminBiometricLogin, adminSignOut, isUploading, setIsUploading, uploadType, setUploadType,
     uploadTitle, setUploadTitle, uploadDesc, setUploadDesc, uploadPrice, setUploadPrice, uploadCatName, setUploadCatName,
     uploadWidth, setUploadWidth, uploadHeight, setUploadHeight, uploadUnit, setUploadUnit, selectedFile, setSelectedFile,
@@ -317,6 +368,6 @@ export default function useStudioEngine() {
     handleDeleteCollection, saveStudioInfo, handlePriceUpdate, handleShippingUpdate, moveArtworkLocation, toggleStatus, deleteArtwork,
     customersList, handleAddToBasket, handleSmartShare, handleSurpriseMe, openUploadModal, handleFileChange,
     handlePublishUpload, getCollectionCover, removeFromBasket, handleCheckout,
-    toastMessage, triggerToast, basketShipping, shippingConfig, setShippingConfig
+    toastMessage, triggerToast, basketShipping, shippingConfig, setShippingConfig, isLoading
   };
 }

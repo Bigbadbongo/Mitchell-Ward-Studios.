@@ -2,13 +2,11 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft, ShoppingBag, MapPin, Mail, ChevronRight, Package, User } from "lucide-react";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
-import { useUI } from "../context/UIContext";
 
-export default function AdminOrdersView() {
-  const { setMenuState } = useUI();
+export default function AdminOrdersView({ setMenuState }: any) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -44,7 +42,7 @@ export default function AdminOrdersView() {
     fetchOrders();
   }, []);
 
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       alert("Address copied to clipboard!");
     });
@@ -58,7 +56,6 @@ export default function AdminOrdersView() {
     );
   }
 
-  // --- ORDER DETAIL VIEW ---
   if (selectedOrder) {
     const isPaid = selectedOrder.status === "paid";
     
@@ -116,7 +113,7 @@ export default function AdminOrdersView() {
               </h3>
             </div>
             <div className="p-5 space-y-4">
-              {selectedOrder.items?.map((item, idx) => (
+              {selectedOrder.items?.map((item: any, idx: number) => (
                 <div key={idx} className="flex justify-between items-center text-sm">
                   <div>
                     <span className="font-bold text-slate-800">{item.title}</span>
@@ -146,12 +143,11 @@ export default function AdminOrdersView() {
     );
   }
 
-  // --- LEDGER LIST VIEW ---
   return (
     <div className="flex-1 flex flex-col w-full max-w-[1000px] mx-auto animate-in fade-in duration-300">
       <div className="sticky top-0 z-10 bg-[#fafafa]/80 backdrop-blur-xl px-4 py-3 flex items-center justify-between border-b border-stone-200 shadow-sm">
-        <button onClick={() => setMenuState("admin")} className="flex items-center gap-2 text-[#2A0845] font-bold uppercase tracking-widest text-xs hover:bg-stone-200/50 py-2 px-3 rounded-xl transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+        <button onClick={() => setMenuState("admin")} className="flex items-center gap-2 text-[#2A0845] font-bold uppercase tracking-widest text-xs hover:bg-stone-200/50 py-2 px-3 rounded-xl transition-colors shrink-0">
+          <ArrowLeft className="w-4 h-4" /> Back <span className="hidden sm:inline">to Manager</span>
         </button>
       </div>
 
@@ -172,16 +168,15 @@ export default function AdminOrdersView() {
         ) : (
           <div className="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden">
             
-            {/* MOBILE CARD LAYOUT */}
             <div className="block md:hidden divide-y divide-stone-100">
               {orders.map((order: any) => {
                 const isPaid = order.status === "paid";
                 const orderDate = new Date(order.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
                 return (
-                  <div key={(order as any).orderId || order.id} onClick={() => setSelectedOrder(order)} className="p-5 hover:bg-stone-50 cursor-pointer transition-colors active:scale-[0.98]">
+                  <div key={order.orderId || order.id} onClick={() => setSelectedOrder(order)} className="p-5 hover:bg-stone-50 cursor-pointer transition-colors active:scale-[0.98]">
                     <div className="flex justify-between items-start mb-3 gap-4">
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-black text-[#2A0845] uppercase tracking-widest truncate">{(order as any).orderId || order.id}</p>
+                        <p className="text-xs font-black text-[#2A0845] uppercase tracking-widest truncate">{order.orderId || order.id}</p>
                         <p className="text-[10px] font-bold text-slate-400 mt-0.5">{orderDate}</p>
                       </div>
                       <span className={`shrink-0 inline-flex items-center px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest ${isPaid ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
@@ -202,7 +197,6 @@ export default function AdminOrdersView() {
               })}
             </div>
 
-            {/* DESKTOP TABLE LAYOUT */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -223,11 +217,11 @@ export default function AdminOrdersView() {
                     
                     return (
                       <tr 
-                        key={(order as any).orderId || order.id} 
+                        key={order.orderId || order.id}
                         onClick={() => setSelectedOrder(order)}
                         className="hover:bg-stone-50/50 cursor-pointer transition-colors group"
                       >
-                        <td className="p-4 text-xs font-black text-[#2A0845] whitespace-nowrap">{(order as any).orderId || order.id}</td>
+                        <td className="p-4 text-xs font-black text-[#2A0845] whitespace-nowrap">{order.orderId || order.id}</td>
                         <td className="p-4 text-sm font-bold text-slate-500 whitespace-nowrap">{orderDate}</td>
                         <td className="p-4 max-w-[200px]">
                           <p className="text-sm font-black text-slate-800 truncate">{order.customerName || "Guest"}</p>

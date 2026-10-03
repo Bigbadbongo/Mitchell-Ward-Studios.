@@ -7,3 +7,5 @@ coverage/
 .env*
 !.env.example
 node-env/
+.idea/
+*.iml

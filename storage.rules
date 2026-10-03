@@ -1,0 +1,38 @@
+rules_version = '2';
+
+// Craft rules based on data in your Firestore database
+// allow write: if firestore.get(
+//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Check if the user is an admin
+    function isAdmin() {
+      return request.auth != null && 
+             request.auth.token != null && 
+             request.auth.token.email != null && (
+        request.auth.token.email.lower() == "mitch363@googlemail.com" ||
+        request.auth.token.email.lower() == "mitch363@gmail.com" ||
+        request.auth.token.email.lower() == "mitchellwardstudios@gmail.com"
+      );
+    }
+
+    // Allow public read access to display images
+    match /studio/{allPaths=**} {
+      allow read: if true;
+    }
+    match /studio_secondary/{allPaths=**} {
+      allow read: if true;
+    }
+
+    // Explicitly block public read access to print_originals
+    match /print_originals/{allPaths=**} {
+      allow read: if isAdmin();
+    }
+
+    // Global write rule for admins
+    match /{allPaths=**} {
+      allow write: if isAdmin();
+    }
+  }
+}

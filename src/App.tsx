@@ -75,6 +75,7 @@ export default function App() {
               setSelectedSubCategory={engine.setSelectedSubCategory}
               setMenuState={engine.setMenuState}
               handleSurpriseMe={engine.handleSurpriseMe}
+              isCurating={engine.isCurating}
             />
           )}
 
@@ -86,6 +87,7 @@ export default function App() {
               setMenuState={engine.setMenuState}
               photoPrices={engine.photoPrices}
               photoSize={engine.photoSize}
+              isLoading={engine.isLoading}
             />
           )}
 
@@ -100,6 +102,7 @@ export default function App() {
                 photoPrices={engine.photoPrices}
                 handleSmartShare={engine.handleSmartShare}
                 handleAddToBasket={engine.handleAddToBasket}
+                curationNotes={engine.curationNotes}
               />
             ) : (
               <ArtworkDetailView 
@@ -111,6 +114,7 @@ export default function App() {
                 photoPrices={engine.photoPrices}
                 handleSmartShare={engine.handleSmartShare}
                 handleAddToBasket={engine.handleAddToBasket}
+                curationNotes={engine.curationNotes}
               />
             )
           )}

@@ -36,6 +36,8 @@ export default function AppHeader() {
               <span className="block text-[8px] md:text-[10px] tracking-[0.4em]">S T U D I O S</span>
             </span>
           ) : menuState === "admin" ? "Studio Manager" 
+            : menuState === "clients" ? "Client Manager"
+            : menuState === "orders" ? "Sales Ledger"
             : menuState === "admin_collections" ? "Manage " + activeCategory 
             : menuState === "admin_list" ? "Folder: " + selectedSubCategory 
             : menuState === "detail" ? "Art Details" 

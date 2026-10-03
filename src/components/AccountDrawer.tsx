@@ -1,20 +1,79 @@
 import React, { useState, useEffect } from "react";
-import { X, Lock } from "lucide-react";
+import { X, Lock, Download, Loader2 } from "lucide-react";
 import { useUI } from "../context/UIContext";
 import { useAuth } from "../context/AuthContext";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
+import { db, functions } from "../firebase";
 
 export default function AccountDrawer() {
   const { isAccountOpen, setIsAccountOpen } = useUI();
   const { userName, userEmail, saveUserProfile, deleteUserProfile } = useAuth();
   const [localName, setLocalName] = useState(userName);
   const [localEmail, setLocalEmail] = useState(userEmail);
+  const [digitalOrders, setDigitalOrders] = useState<any[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [downloadingItemId, setDownloadingItemId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAccountOpen) {
       setLocalName(userName);
       setLocalEmail(userEmail);
+      if (userEmail) {
+        fetchDigitalOrders(userEmail);
+      }
     }
   }, [isAccountOpen, userName, userEmail]);
+
+  const fetchDigitalOrders = async (email: string) => {
+    setIsLoadingOrders(true);
+    try {
+      const q = query(
+        collection(db, "orders"), 
+        where("customerEmail", "==", email.toLowerCase()),
+        where("status", "==", "paid")
+      );
+      const snapshot = await getDocs(q);
+      const items: any[] = [];
+      snapshot.forEach(doc => {
+        const order = doc.data();
+        if (order.items) {
+          order.items.forEach((item: any) => {
+            if (item.size === "Digital Download" || item.includeDigitalCopy === true) {
+              items.push({
+                orderId: doc.id,
+                artworkId: item.id,
+                title: item.title + (item.includeDigitalCopy && item.size !== "Digital Download" ? " (Digital Copy)" : ""),
+                date: order.date
+              });
+            }
+          });
+        }
+      });
+      setDigitalOrders(items);
+    } catch (err) {
+      console.error("Failed to fetch digital orders", err);
+    } finally {
+      setIsLoadingOrders(false);
+    }
+  };
+
+  const handleDownload = async (orderId: string, artworkId: string) => {
+    setDownloadingItemId(artworkId);
+    try {
+      const getDownloadLink = httpsCallable(functions, 'getDigitalDownloadLink');
+      const result = await getDownloadLink({ email: localEmail, orderId, artworkId });
+      const { url } = result.data as any;
+      if (url) {
+        window.open(url, '_blank');
+      }
+    } catch (err) {
+      console.error("Failed to get download link", err);
+      alert("Error generating download link. Please contact support.");
+    } finally {
+      setDownloadingItemId(null);
+    }
+  };
 
   if (!isAccountOpen) return null;
 
@@ -62,6 +121,38 @@ export default function AccountDrawer() {
                 We only use your details to process your order and safely deliver your art. We will never sell your data or use it for marketing.
               </p>
             </div>
+
+            {/* DIGITAL DOWNLOADS */}
+            {localEmail && (
+              <div className="mt-8 border-t border-stone-200 pt-6">
+                <h3 className="font-black text-sm text-[#2A0845] mb-4 uppercase tracking-widest">My Digital Collection</h3>
+                {isLoadingOrders ? (
+                  <div className="flex justify-center p-4">
+                    <Loader2 className="w-5 h-5 animate-spin text-stone-400" />
+                  </div>
+                ) : digitalOrders.length > 0 ? (
+                  <div className="space-y-3">
+                    {digitalOrders.map((item, idx) => (
+                      <div key={idx} className="bg-stone-50 p-4 rounded-xl border border-stone-200 flex justify-between items-center">
+                        <div>
+                          <p className="text-xs font-bold text-slate-800">{item.title}</p>
+                          <p className="text-[10px] text-slate-500 mt-1">Order: {item.orderId}</p>
+                        </div>
+                        <button 
+                          onClick={() => handleDownload(item.orderId, item.artworkId)}
+                          disabled={downloadingItemId === item.artworkId}
+                          className="p-2 bg-[#2A0845] text-white rounded-lg hover:bg-[#5C0A96] transition-colors disabled:opacity-50"
+                        >
+                          {downloadingItemId === item.artworkId ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500 italic">No digital downloads found for this email.</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

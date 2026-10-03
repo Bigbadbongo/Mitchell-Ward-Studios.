@@ -171,3 +171,70 @@ exports.stripeWebhookHandler = functions.https.onRequest(async (req, res) => {
   // Return a 200 response to acknowledge receipt of the event
   res.json({received: true});
 });
+
+exports.getDigitalDownloadLink = functions.https.onCall(async (request) => {
+  const data = request.data || {};
+  const { email, orderId, artworkId } = data;
+
+  if (!email || !orderId || !artworkId) {
+    throw new functions.https.HttpsError('invalid-argument', 'Missing required parameters.');
+  }
+
+  try {
+    // 1. Verify the order exists and belongs to the user
+    const orderDoc = await db.collection('orders').doc(orderId).get();
+    if (!orderDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Order not found.');
+    }
+
+    const orderData = orderDoc.data();
+    if (orderData.customerEmail.toLowerCase() !== email.toLowerCase()) {
+      throw new functions.https.HttpsError('permission-denied', 'Order does not belong to this email.');
+    }
+    if (orderData.status !== 'paid') {
+      throw new functions.https.HttpsError('failed-precondition', 'Order is not paid.');
+    }
+
+    // 2. Verify the order contains the requested digital download
+    const item = orderData.items.find(i => i.id === artworkId && (i.size === 'Digital Download' || i.includeDigitalCopy === true));
+    if (!item) {
+      throw new functions.https.HttpsError('not-found', 'Digital download not found in this order.');
+    }
+
+    // 3. Lookup the artwork's storage path
+    const artDoc = await db.collection('artworks').doc(artworkId).get();
+    if (!artDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Artwork not found.');
+    }
+
+    const artData = artDoc.data();
+    const storagePath = artData.highResStoragePath;
+    if (!storagePath) {
+      throw new functions.https.HttpsError('not-found', 'Digital file path is missing.');
+    }
+
+    // 4. Generate signed URL
+    const bucket = admin.storage().bucket();
+    const file = bucket.file(storagePath);
+    
+    // Check if file exists
+    const [exists] = await file.exists();
+    if (!exists) {
+      throw new functions.https.HttpsError('not-found', 'Digital file not found in storage.');
+    }
+
+    const [url] = await file.getSignedUrl({
+      version: 'v4',
+      action: 'read',
+      expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+    });
+
+    return { url };
+  } catch (error) {
+    console.error("Error generating download link:", error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError('internal', 'An internal error occurred.');
+  }
+});

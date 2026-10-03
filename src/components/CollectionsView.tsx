@@ -1,17 +1,22 @@
 import React from "react";
-import { useUI } from "../context/UIContext";
-import { useInventory } from "../context/InventoryContext";
-import useStudioEngine from "./useStudioEngine";
+import { Sparkles, Loader2 } from "lucide-react";
 
-export default function CollectionsView() {
-  const { activeCategory, setSelectedSubCategory, setMenuState } = useUI();
-  const { currentActiveFolderList } = useInventory();
-  const { getCollectionCover, handleSurpriseMe } = useStudioEngine();
+export default function CollectionsView({
+  currentActiveFolderList,
+  activeCategory,
+  getCollectionCover,
+  setSelectedSubCategory,
+  setMenuState,
+  handleSurpriseMe,
+  isCurating
+}: any) {
+  const safeList = Array.isArray(currentActiveFolderList) ? currentActiveFolderList : [];
+
   return (
     <div className="flex-1 flex flex-col w-full max-w-5xl mx-auto animate-in fade-in pb-10 pt-4 px-2 md:px-6">
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-        {currentActiveFolderList.map((catName, index) => {
+        {safeList.map((catName: string, index: number) => {
           const coverImg = getCollectionCover(activeCategory, catName);
           return (
             <button 
@@ -30,9 +35,22 @@ export default function CollectionsView() {
       
       <button 
         onClick={() => handleSurpriseMe(activeCategory)} 
-        className="h-16 md:h-20 max-w-[280px] md:max-w-[400px] mx-auto w-full bg-white text-[#2A0845] border-2 border-[#2A0845] relative active:scale-95 transition-all flex items-center justify-center rounded-2xl md:rounded-3xl shadow-sm overflow-hidden group hover:bg-stone-50"
+        disabled={isCurating}
+        className={"h-16 md:h-20 max-w-[280px] md:max-w-[400px] mx-auto w-full bg-white text-[#2A0845] border-2 border-[#2A0845] relative active:scale-95 transition-all flex items-center justify-center rounded-2xl md:rounded-3xl shadow-sm overflow-hidden group hover:bg-stone-50 " + (isCurating ? "opacity-75 cursor-wait" : "")}
       >
-        <span className="font-black text-sm md:text-base tracking-widest z-10 uppercase group-hover:scale-105 transition-transform">SURPRISE ME</span>
+        <span className="font-black text-sm md:text-base tracking-widest z-10 uppercase group-hover:scale-105 transition-transform flex items-center gap-2">
+          {isCurating ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin text-[#2A0845]" />
+              <span>Curating Artwork...</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4 text-[#2A0845]" />
+              <span>SURPRISE ME</span>
+            </>
+          )}
+        </span>
       </button>
     </div>
   );

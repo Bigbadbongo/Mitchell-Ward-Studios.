@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Share2, CheckCircle, Plus, X, ZoomIn, Layout } from "lucide-react";
-import useStudioEngine from "./useStudioEngine";
+import { Share2, CheckCircle, Plus, X, ZoomIn, Sparkles } from "lucide-react";
 
 // Parse size text (e.g. "1m x 1m", "60cm x 70cm", "100x100") to width and height in cm
 function parseSizeToCm(sizeString: string): { width: number; height: number } {
@@ -106,14 +105,14 @@ function getFrameStyles(chosenFrame: string, frameStyle: string, frameWidthCm: n
   };
 }
 
-export default function ArtworkDetailView() {
-  const { 
-    selectedArtwork, 
-    chosenFrame, 
-    setChosenFrame, 
-    handleSmartShare, 
-    handleAddToBasket 
-  } = useStudioEngine();
+export default function ArtworkDetailView({
+  selectedArtwork,
+  chosenFrame,
+  setChosenFrame,
+  handleSmartShare,
+  handleAddToBasket,
+  curationNotes
+}: any) {
   const [isMagnified, setIsMagnified] = useState(false);
   const [currentSlide, setCurrentSlide] = useState<"main" | "secondary">("main");
   const [frameStyle, setFrameStyle] = useState<"minimalist" | "classic">("minimalist");
@@ -136,11 +135,11 @@ export default function ArtworkDetailView() {
       <div className="flex flex-col lg:flex-row gap-6 animate-in zoom-in-95 duration-200 w-full max-w-6xl mx-auto px-2 md:px-6 mb-8">
         {/* LEFT COLUMN: IMAGE AND FRAMING */}
         <div className="flex-1 flex flex-col space-y-4 min-w-0">
-          <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-sm relative">
+          <div className="bg-white p-0 sm:p-4 rounded-none sm:rounded-xl border-x-0 sm:border border-stone-200 shadow-sm relative">
             {/* TAB 1: ARTWORK DETAIL IMAGE VIEW (WITH OPTIONAL CAROUSEL) */}
             <div className="mb-4">
               <div 
-                className={`bg-stone-50 rounded-lg p-2 md:p-4 flex justify-center items-center min-h-[350px] relative overflow-hidden group ${currentSlide === "main" ? "cursor-pointer" : ""}`}
+                className={`bg-stone-50 rounded-none sm:rounded-lg p-4 flex justify-center items-center min-h-[45vh] sm:min-h-[350px] relative overflow-hidden group ${currentSlide === "main" ? "cursor-pointer" : ""}`}
                 onClick={() => currentSlide === "main" && setIsMagnified(true)}
               >
                 {currentSlide === "main" ? (
@@ -149,9 +148,9 @@ export default function ArtworkDetailView() {
                     className="relative transition-all duration-300 shadow-2xl mx-auto"
                     style={{
                       aspectRatio: `${totalWidthCm} / ${totalHeightCm}`,
-                      height: '500px',
-                      maxHeight: '60vh',
-                      maxWidth: '100%',
+                      width: '100%',
+                      maxWidth: `min(100%, calc(55vh * ${totalWidthCm / totalHeightCm}))`,
+                      maxHeight: '55vh',
                       ...getFrameStyles(chosenFrame, frameStyle, frameWidth, 60),
                       boxShadow: chosenFrame !== 'None' ? `0 ${8 + frameWidth * 2}px ${16 + frameWidth * 4}px rgba(0,0,0,0.3)` : '0 4px 12px rgba(0,0,0,0.1)'
                     }}
@@ -182,7 +181,7 @@ export default function ArtworkDetailView() {
                       <img 
                         src={selectedArtwork.src} 
                         alt={selectedArtwork.title} 
-                        className="w-full h-full object-fill transition-all duration-300 select-none block"
+                        className="w-full h-full object-contain transition-all duration-300 select-none block"
                         style={{
                           boxShadow: chosenFrame === 'None' ? '0 1px 4px rgba(0,0,0,0.15)' : 'none'
                         }}
@@ -233,53 +232,7 @@ export default function ArtworkDetailView() {
               )}
             </div>
 
-          {/* ADVANCED DYNAMIC FRAMING CONTROLS */}
-          <div className="bg-stone-50 p-4 rounded-xl border border-stone-200/60 space-y-3 mb-4 text-[10px] shadow-sm">
-            <div>
-              <span className="font-bold text-slate-500 uppercase block mb-1.5">Frame Selection:</span>
-              <div className="flex gap-1.5 flex-wrap">
-                {['None', 'Black', 'White', 'Pine', 'Oak', 'Gold'].map(f => (
-                  <button 
-                    key={f} 
-                    onClick={() => setChosenFrame(f)} 
-                    className={"px-3 py-1.5 text-[9px] font-bold rounded-lg border transition-all " + (chosenFrame === f ? 'bg-[#2A0845] text-white border-[#2A0845] shadow-sm' : 'bg-white text-slate-500 border-stone-200 hover:border-slate-300')}
-                  >
-                    {f}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {chosenFrame !== 'None' && (
-              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-stone-200/50 items-center">
-                <div>
-                  <span className="font-bold text-slate-500 uppercase block mb-1">Frame Profile:</span>
-                  <div className="bg-stone-100 py-1.5 px-2 rounded-lg border border-stone-200/20 text-[8px] font-black text-slate-600 text-center uppercase tracking-widest">
-                    Floating Frame
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="font-bold text-slate-500 uppercase">Frame Thickness:</span>
-                    <span className="font-mono text-slate-400 font-bold">{frameWidth}cm</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="0.5" 
-                    max="2.5" 
-                    step="0.5" 
-                    value={frameWidth} 
-                    onChange={e => setFrameWidth(parseFloat(e.target.value))}
-                    className="w-full accent-[#2A0845] cursor-pointer"
-                  />
-                </div>
-              </div>
-            )}
           </div>
-          
-          <p className="text-[9px] text-center text-slate-400 font-bold uppercase tracking-wider mb-2">* Interactive preview customized to physical scale.</p>
-        </div>
         </div>
 
         {/* RIGHT COLUMN: DETAILS AND BASKET */}
@@ -294,7 +247,58 @@ export default function ArtworkDetailView() {
           
           <p className="text-sm text-slate-600 mb-4 bg-stone-50 p-3 rounded-lg border border-stone-100 leading-relaxed">{selectedArtwork.description}</p>
           
+          {curationNotes && (
+            <div className="mb-4 bg-gradient-to-br from-[#2A0845]/5 via-[#2A0845]/10 to-transparent p-3.5 rounded-xl border border-[#2A0845]/20 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="flex items-center gap-2 mb-1.5 text-[#2A0845]">
+                <Sparkles className="w-4 h-4 animate-pulse text-[#2A0845]" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Curator's Recommendation</span>
+              </div>
+              <p className="text-xs text-slate-700 italic leading-relaxed">
+                "{curationNotes}"
+              </p>
+            </div>
+          )}
+
           <p className="text-xs text-[#2A0845] font-bold mb-4">{selectedArtwork.size} | {selectedArtwork.medium}</p>
+
+          <div className="mb-4 bg-stone-50 p-3 rounded-lg border border-stone-100">
+            <label className="text-[10px] font-bold text-slate-500 block mb-2 uppercase tracking-wider">Virtual Framing Options:</label>
+            
+            {/* Frame Color */}
+            <div className="flex gap-1.5 flex-wrap mb-3">
+              {['None', 'Black', 'White', 'Pine', 'Oak', 'Gold'].map(f => (
+                <button 
+                  key={f} 
+                  onClick={() => setChosenFrame(f)} 
+                  className={"px-2.5 py-1 text-[9px] font-bold rounded-md border transition-all " + (chosenFrame === f ? 'bg-[#2A0845] text-white border-[#2A0845] shadow-sm' : 'bg-white text-slate-500 border-stone-200 hover:border-slate-300')}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+
+            {chosenFrame !== 'None' && (
+              <div className="bg-white p-2.5 rounded-md border border-stone-100 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase">Profile:</span>
+                  <div className="bg-stone-50 py-1 px-2 rounded-md border border-stone-100 text-[8px] font-black text-slate-600 text-center uppercase tracking-widest">
+                    Floating Frame
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase">Thickness:</span>
+                    <span className="text-[9px] font-mono font-bold text-slate-400">{frameWidth}cm</span>
+                  </div>
+                  <input type="range" min="0.5" max="2.5" step="0.5" value={frameWidth} onChange={e => setFrameWidth(parseFloat(e.target.value))} className="w-full accent-[#2A0845] cursor-pointer h-1" />
+                </div>
+              </div>
+            )}
+            
+            <p className="text-[8px] text-slate-400 uppercase tracking-wider mt-2 leading-tight">
+              * Preview only. Scale is approximate.
+            </p>
+          </div>
 
             {selectedArtwork.isSold ? (
               <div className="mt-2 w-full bg-stone-200 text-stone-500 py-3 rounded-xl font-black tracking-widest flex items-center justify-center gap-2 text-sm"><CheckCircle className="w-4 h-4" /> SOLD OUT</div>
@@ -305,7 +309,7 @@ export default function ArtworkDetailView() {
                   <span className="text-[10px] font-bold text-slate-400 text-center sm:text-left">{postageCost}</span>
                 </div>
                 
-                <button onClick={handleAddToBasket} className="w-full sm:flex-1 bg-[#2A0845] text-white py-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#5C0A96] active:scale-95 transition-all"><Plus className="w-5 h-5" /> ADD TO BASKET</button>
+                <button onClick={() => handleAddToBasket()} className="w-full sm:flex-1 bg-[#2A0845] text-white py-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 hover:bg-[#5C0A96] active:scale-95 transition-all"><Plus className="w-5 h-5" /> ADD TO BASKET</button>
               </div>
             )}
           </div>

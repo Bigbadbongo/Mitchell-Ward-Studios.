@@ -33,12 +33,13 @@ export const uploadArtworkService = async ({
     thumbnailUrl = await getDownloadURL(thumbRef);
   }
 
-  let highResUrl = "";
+  let highResStoragePath = null;
   if (uploadType === "Photography" && selectedPrintFile) {
     const extension = selectedPrintFile.name.split('.').pop() || "png";
-    const fileRef = ref(storage, "print_originals/" + Date.now() + "_" + Math.random().toString(36).substring(7) + "." + extension);
+    const path = "print_originals/" + Date.now() + "_" + Math.random().toString(36).substring(7) + "." + extension;
+    const fileRef = ref(storage, path);
     await uploadBytes(fileRef, selectedPrintFile);
-    highResUrl = await getDownloadURL(fileRef);
+    highResStoragePath = path;
   }
 
   let secondaryUrl = "";
@@ -62,7 +63,7 @@ export const uploadArtworkService = async ({
     title: uploadTitle || "Untitled Work", description: uploadDesc || "Fresh from the studio.",
     category: uploadType, subcategory: uploadCatName, src: imageUrl,
     thumbnailSrc: thumbnailUrl || imageUrl,
-    highResSrc: highResUrl || null,
+    highResStoragePath: highResStoragePath,
     secondarySrc: secondaryUrl || null,
     isSold: false, isVaulted: false,
     price: uploadType === "Paintings" ? Number(uploadPrice) || 0 : 0, 

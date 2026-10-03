@@ -31,7 +31,7 @@ export default function AdminSettingsDrawer({
   const [activeTab, setActiveTab] = useState("config");
 
   // We lock the sizes in this exact order so the database can't shuffle them!
-  const FIXED_SIZE_ORDER = ["A4 Print", "A3 Print", "A2 Print", "50x70cm Print", "A1 Print"];
+  const FIXED_SIZE_ORDER = ["A4 Print", "A3 Print", "A2 Print", "50x70cm Print", "A1 Print", "Digital Download"];
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6">

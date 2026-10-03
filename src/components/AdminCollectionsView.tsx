@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Upload, Folder, ArrowRight, Archive } from "lucide-react";
-import { useUI } from "../context/UIContext";
-import { useInventory } from "../context/InventoryContext";
-import useStudioEngine from "./useStudioEngine";
+import { Upload, Folder, Archive } from "lucide-react";
 
-export default function AdminCollectionsView() {
-  const { activeCategory, setSelectedSubCategory, setMenuState } = useUI();
-  const { currentActiveFolderList } = useInventory();
-  const { openUploadModal } = useStudioEngine();
+export default function AdminCollectionsView({
+  activeCategory,
+  openUploadModal,
+  currentActiveFolderList,
+  setSelectedSubCategory,
+  setMenuState
+}: any) {
   const safeList = Array.isArray(currentActiveFolderList) ? currentActiveFolderList : [];
   const [folders, setFolders] = useState(safeList);
 

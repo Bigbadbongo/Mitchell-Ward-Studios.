@@ -5,9 +5,9 @@ service cloud.firestore {
     // Check if the user is an admin
     function isAdmin() {
       return request.auth != null && (
-        request.auth.token.email.lower() == "mitch363@googlemail.com" ||
-        request.auth.token.email.lower() == "mitch363@gmail.com" ||
-        request.auth.token.email.lower() == "mitchellwardstudios@gmail.com"
+        request.auth.token.email == "mitch363@googlemail.com" ||
+        request.auth.token.email == "mitch363@gmail.com" ||
+        request.auth.token.email == "mitchellwardstudios@gmail.com"
       );
     }
 
@@ -34,12 +34,10 @@ service cloud.firestore {
     
     // Customers Collection
     match /customers/{emailId} {
-      // Allow a user to read/write their own profile if authenticated, or allow write during guest checkout
-      // emailId is the lowercase email address
-      allow get: if isAdmin() || (request.auth != null && request.auth.token.email.lower() == emailId);
-      allow write: if isAdmin() || (request.auth == null) || (request.auth != null && request.auth.token.email.lower() == emailId);
-
-      // Only admins can list all customers or delete them
+      // Anyone can save/update their customer details during checkout, but they cannot read the customer list
+      allow get: if true;
+      allow write: if true;
+      // Only admins can list/query all customers
       allow list, delete: if isAdmin();
     }
     

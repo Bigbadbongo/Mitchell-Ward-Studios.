@@ -39,7 +39,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   const [inventory, setInventory] = useState(FALLBACK_ARTWORKS);
   const [paintCats, setPaintCats] = useState(["Mini Canvases", "Studio Pieces", "Statement Pieces"]);
   const [photoCats, setPhotoCats] = useState(["Nature & Landscapes", "Urban & Culture", "Studio Selections"]);
-  const [photoPrices, setPhotoPrices] = useState({ "A4 Print": 30, "A3 Print": 45, "A2 Print": 55, "A1 Print": 85 });
+  const [photoPrices, setPhotoPrices] = useState({ "A4 Print": 30, "A3 Print": 45, "A2 Print": 55, "A1 Print": 85, "Digital Download": 15 });
   
   const [localPrices, setLocalPrices] = useState(photoPrices);
 

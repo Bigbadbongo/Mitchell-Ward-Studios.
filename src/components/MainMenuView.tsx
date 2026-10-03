@@ -1,17 +1,14 @@
 import React from "react";
 import { Settings, ArrowRight } from "lucide-react";
-import { useUI } from "../context/UIContext";
-import { useAuth } from "../context/AuthContext";
 
-export default function MainMenuView() {
-  const { 
-    menuState, 
-    setActiveCategory, 
-    setMenuState, 
-    setIsStudioPanelOpen, 
-    setIsAdminSettingsOpen 
-  } = useUI();
-  const { isAdmin } = useAuth();
+export default function MainMenuView({
+  menuState,
+  setActiveCategory,
+  setMenuState,
+  setIsStudioPanelOpen,
+  setIsAdminSettingsOpen,
+  isAdmin
+}: any) {
   if (menuState !== "main" && menuState !== "admin") return null;
 
   return (

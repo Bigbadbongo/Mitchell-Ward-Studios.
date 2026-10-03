@@ -16,7 +16,8 @@ interface CartContextType {
     photoPrices: any,
     photoSize: string,
     shippingConfig: any,
-    chosenFrame: string
+    chosenFrame: string,
+    includeDigitalCopy?: boolean
   ) => void;
   removeFromBasket: (cartId: number) => void;
   handleCheckout: (checkoutData?: any) => Promise<void>;
@@ -42,17 +43,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
     photoPrices: any,
     photoSize: string,
     shippingConfig: any,
-    chosenFrame: string
+    chosenFrame: string,
+    includeDigitalCopy: boolean = false
   ) => {
     if (!selectedArtwork) return;
 
-    const activePrice = selectedArtwork.category === "Photography" ? photoPrices[photoSize] : selectedArtwork.price;
+    const isDigitalStandalone = photoSize === "Digital Download";
+    const basePrice = selectedArtwork.category === "Photography" ? photoPrices[photoSize] : selectedArtwork.price;
     const activeSize = selectedArtwork.category === "Photography" ? photoSize : selectedArtwork.size;
     
+    // Add-on price (if buying a print and adding the digital file)
+    const addonPrice = includeDigitalCopy ? 10 : 0;
+    const finalPrice = basePrice + addonPrice;
+
     let shippingCost = 0;
-    if (selectedArtwork.category === "Photography") {
+    if (isDigitalStandalone) {
+      shippingCost = 0;
+    } else if (selectedArtwork.category === "Photography") {
       shippingCost = shippingConfig.photographyFlatRate || 5.95; 
     } else {
+      // ... paintings logic
       let maxDim = 50;
       try {
         const sizeStr = String(selectedArtwork.size || "").toLowerCase().replace(/\s+/g, '');
@@ -76,7 +86,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
       else shippingCost = shippingConfig.oversized?.price || 150;
     }
 
-    setBasket([...basket, { ...selectedArtwork, price: activePrice, size: activeSize, frame: chosenFrame, cartId: Date.now(), shippingCost }]);
+    setBasket([...basket, {
+      ...selectedArtwork,
+      price: finalPrice,
+      size: activeSize,
+      frame: chosenFrame,
+      cartId: Date.now(),
+      shippingCost,
+      includeDigitalCopy: includeDigitalCopy || isDigitalStandalone
+    }]);
     setIsBasketOpen(true);
   };
 
@@ -118,7 +136,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         size: item.size,
         price: item.price,
         shipping: item.shippingCost,
-        category: item.category
+        category: item.category,
+        includeDigitalCopy: item.includeDigitalCopy || false
       })),
       subtotal: basketSubtotal,
       shipping: basketShipping,
