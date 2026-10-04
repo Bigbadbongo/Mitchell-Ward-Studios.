@@ -132,14 +132,14 @@ export default function ArtworkDetailView({
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row gap-6 animate-in zoom-in-95 duration-200 w-full max-w-6xl mx-auto px-2 md:px-6 mb-8">
+      <div className="flex flex-col lg:flex-row gap-6 animate-in zoom-in-95 duration-200 w-full max-w-6xl mx-auto px-1 sm:px-2 md:px-6 mb-8">
         {/* LEFT COLUMN: IMAGE AND FRAMING */}
         <div className="flex-1 flex flex-col space-y-4 min-w-0">
-          <div className="bg-white p-0 sm:p-4 rounded-none sm:rounded-xl border-x-0 sm:border border-stone-200 shadow-sm relative">
+          <div className="bg-white p-1.5 sm:p-4 rounded-2xl border border-stone-200 shadow-sm relative">
             {/* TAB 1: ARTWORK DETAIL IMAGE VIEW (WITH OPTIONAL CAROUSEL) */}
-            <div className="mb-4">
+            <div className="mb-3 sm:mb-4">
               <div 
-                className={`bg-stone-50 rounded-none sm:rounded-lg p-4 flex justify-center items-center min-h-[45vh] sm:min-h-[350px] relative overflow-hidden group ${currentSlide === "main" ? "cursor-pointer" : ""}`}
+                className={`bg-stone-50 rounded-xl p-2 sm:p-4 flex justify-center items-center min-h-[50vh] sm:min-h-[380px] relative overflow-hidden group ${currentSlide === "main" ? "cursor-pointer" : ""}`}
                 onClick={() => currentSlide === "main" && setIsMagnified(true)}
               >
                 {currentSlide === "main" ? (
@@ -149,8 +149,8 @@ export default function ArtworkDetailView({
                     style={{
                       aspectRatio: `${totalWidthCm} / ${totalHeightCm}`,
                       width: '100%',
-                      maxWidth: `min(100%, calc(55vh * ${totalWidthCm / totalHeightCm}))`,
-                      maxHeight: '55vh',
+                      maxWidth: `min(100%, calc(68vh * ${totalWidthCm / totalHeightCm}))`,
+                      maxHeight: '68vh',
                       ...getFrameStyles(chosenFrame, frameStyle, frameWidth, 60),
                       boxShadow: chosenFrame !== 'None' ? `0 ${8 + frameWidth * 2}px ${16 + frameWidth * 4}px rgba(0,0,0,0.3)` : '0 4px 12px rgba(0,0,0,0.1)'
                     }}

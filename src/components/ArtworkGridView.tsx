@@ -50,9 +50,9 @@ export default function ArtworkGridView({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom duration-200 pb-12 w-full max-w-7xl mx-auto px-2 md:px-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 animate-in fade-in slide-in-from-bottom duration-200 pb-12 w-full max-w-7xl mx-auto px-1 sm:px-2 md:px-6">
       {filteredArtworks.length === 0 ? (
-        <div className="text-center py-10 text-slate-400 font-bold uppercase tracking-widest text-sm bg-white rounded-xl border border-stone-200 p-6">
+        <div className="text-center py-10 text-slate-400 font-bold uppercase tracking-widest text-sm bg-white rounded-2xl border border-stone-200 p-6">
           No artworks currently available in this collection.
         </div>
       ) : filteredArtworks.map((art: any) => {
@@ -67,16 +67,16 @@ export default function ArtworkGridView({
               if(art.category === "Photography") setPhotoSize("A3 Print");
               setMenuState("detail");
             }}
-            className={"w-full text-left bg-white rounded-xl border p-0 sm:p-3 shadow-sm cursor-pointer transition-all " + (art.isSold ? 'border-stone-200 opacity-80' : 'border-stone-200 hover:border-[#2A0845]')}
+            className={"w-full text-left bg-white rounded-2xl border p-2 sm:p-3 shadow-sm cursor-pointer transition-all " + (art.isSold ? 'border-stone-200 opacity-80' : 'border-stone-200 hover:border-[#2A0845]')}
           >
-            <div className="relative bg-stone-50 rounded-lg sm:mb-3 overflow-hidden flex items-center justify-center min-h-[300px] sm:min-h-[250px] p-4">
+            <div className="relative bg-stone-50 rounded-xl mb-2 sm:mb-3 overflow-hidden flex items-center justify-center min-h-[350px] sm:min-h-[260px] p-2 sm:p-4">
                <div
-                 className="relative shadow-xl transition-all duration-300"
+                 className="relative shadow-xl transition-all duration-300 flex items-center justify-center"
                  style={{
                    aspectRatio: `${dims.width} / ${dims.height}`,
                    width: '100%',
-                   maxWidth: `min(100%, calc(230px * ${ratio}))`,
-                   maxHeight: '230px'
+                   maxWidth: `min(100%, calc(350px * ${ratio}))`,
+                   maxHeight: '350px'
                  }}
                >
                  <img
@@ -93,21 +93,21 @@ export default function ArtworkGridView({
                </div>
 
                {art.isSold && (
-                 <div className="absolute inset-0 bg-white/40 flex items-center justify-center rounded-lg backdrop-blur-[1px] pointer-events-none z-10">
+                 <div className="absolute inset-0 bg-white/40 flex items-center justify-center rounded-xl backdrop-blur-[1px] pointer-events-none z-10">
                    <span className="bg-stone-800 text-white px-3 py-1 font-black tracking-widest uppercase text-sm rounded">Sold</span>
                  </div>
                )}
             </div>
 
-            <div className="flex justify-between items-start p-4 sm:p-0">
+            <div className="flex justify-between items-start px-2 py-1.5 sm:p-0">
               <div>
-                <h3 className="font-bold text-slate-800">{art.title}</h3>
-                <p className="text-xs text-slate-500">{art.category === "Photography" ? "Multiple Sizes" : art.size} | {art.medium}</p>
+                <h3 className="font-bold text-slate-800 text-sm md:text-base leading-snug">{art.title}</h3>
+                <p className="text-[11px] text-slate-500 font-medium mt-0.5">{art.category === "Photography" ? "Multiple Sizes" : art.size} | {art.medium}</p>
               </div>
               {art.isSold ? (
                 <span className="font-bold text-stone-400 uppercase text-xs tracking-widest pt-1">Sold Out</span>
               ) : (
-                <span className="font-bold text-[#2A0845]">£{art.category === "Photography" ? photoPrices[photoSize] : art.price}{art.category === "Photography" && "+"}</span>
+                <span className="font-black text-[#2A0845] text-sm md:text-base">£{art.category === "Photography" ? photoPrices[photoSize] : art.price}{art.category === "Photography" && "+"}</span>
               )}
             </div>
           </button>

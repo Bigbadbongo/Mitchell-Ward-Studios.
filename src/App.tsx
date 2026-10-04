@@ -96,7 +96,7 @@ export default function App() {
         
         <AppHeader />
 
-        <main className="flex-1 overflow-y-auto px-6 py-6 flex flex-col bg-[#F0ECE1]">          
+        <main className="flex-1 overflow-y-auto px-2 sm:px-6 py-3 sm:py-6 flex flex-col bg-[#F0ECE1]">          
           
           <MainMenuView 
             menuState={engine.menuState}

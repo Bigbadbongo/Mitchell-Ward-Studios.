@@ -124,15 +124,15 @@ export default function PhotographyDetailView({
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row gap-6 animate-in zoom-in-95 duration-200 w-full max-w-6xl mx-auto px-2 md:px-6 mb-8">
+      <div className="flex flex-col lg:flex-row gap-6 animate-in zoom-in-95 duration-200 w-full max-w-6xl mx-auto px-1 sm:px-2 md:px-6 mb-8">
         <div className="flex-1 flex flex-col space-y-4 min-w-0">
-          <div className="bg-white p-0 sm:p-4 rounded-none sm:rounded-xl border-x-0 sm:border border-stone-200 shadow-sm relative">
-            <div className="mb-4">
+          <div className="bg-white p-1.5 sm:p-4 rounded-2xl border border-stone-200 shadow-sm relative">
+            <div className="mb-3 sm:mb-4">
               <div
-                className="bg-stone-50 rounded-none sm:rounded-lg p-4 flex justify-center items-center min-h-[45vh] sm:min-h-[350px] relative overflow-hidden group cursor-pointer"
+                className="bg-stone-50 rounded-xl p-2 sm:p-4 flex justify-center items-center min-h-[50vh] sm:min-h-[380px] relative overflow-hidden group cursor-pointer"
                 onClick={() => setIsMagnified(true)}
               >
-                <FramedComposite maxH="60vh" />
+                <FramedComposite maxH="68vh" />
                 <div className="absolute top-3 right-3 bg-white/90 p-2 rounded-full shadow-sm opacity-80 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-20">
                   <ZoomIn className="w-5 h-5 text-slate-800" />
                 </div>
