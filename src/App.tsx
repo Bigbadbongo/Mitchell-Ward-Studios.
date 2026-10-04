@@ -24,6 +24,7 @@ import AppHeader from "./components/AppHeader";
 import AppFooter from "./components/AppFooter";
 import { useUI } from "./context/UIContext";
 import { useSwipeBack } from "./hooks/useSwipeBack";
+import { useNativeBackButton } from "./hooks/useNativeBackButton";
 
 export default function App() {
   const engine = useStudioEngine();
@@ -46,6 +47,47 @@ export default function App() {
   useSwipeBack({
     onBack: handleBack,
     enabled: menuState !== "main" && !isAnyDrawerOpen
+  });
+
+  // Native Android back button / back swipe gesture listener via Capacitor App plugin
+  useNativeBackButton({
+    onBack: handleBack,
+    canGoBack: menuState !== "main",
+    onCloseDrawer: () => {
+      if (engine.adminSelectedArt) {
+        engine.setAdminSelectedArt(null);
+        return true;
+      }
+      if (engine.isUploading) {
+        engine.setIsUploading(false);
+        return true;
+      }
+      if (engine.isBasketOpen) {
+        engine.setIsBasketOpen(false);
+        return true;
+      }
+      if (engine.isAccountOpen) {
+        engine.setIsAccountOpen(false);
+        return true;
+      }
+      if (engine.isStudioPanelOpen) {
+        engine.setIsStudioPanelOpen(false);
+        return true;
+      }
+      if (engine.isAdminSettingsOpen) {
+        engine.setIsAdminSettingsOpen(false);
+        return true;
+      }
+      if (engine.showPinPrompt) {
+        engine.setShowPinPrompt(false);
+        return true;
+      }
+      if (isReturnsModalOpen) {
+        setIsReturnsModalOpen(false);
+        return true;
+      }
+      return false;
+    }
   });
 
   return (
