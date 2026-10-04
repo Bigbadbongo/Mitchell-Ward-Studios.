@@ -22,10 +22,31 @@ import AdminOrdersView from "./components/AdminOrdersView";
 import MainMenuView from "./components/MainMenuView";
 import AppHeader from "./components/AppHeader";
 import AppFooter from "./components/AppFooter";
+import { useUI } from "./context/UIContext";
+import { useSwipeBack } from "./hooks/useSwipeBack";
 
 export default function App() {
   const engine = useStudioEngine();
+  const { handleBack, menuState } = useUI();
   const [isReturnsModalOpen, setIsReturnsModalOpen] = useState(false);
+
+  // Determine if any drawer/overlay is currently active
+  const isAnyDrawerOpen = Boolean(
+    engine.isUploading ||
+    engine.isBasketOpen ||
+    engine.isAccountOpen ||
+    engine.isStudioPanelOpen ||
+    engine.isAdminSettingsOpen ||
+    engine.showPinPrompt ||
+    engine.adminSelectedArt ||
+    isReturnsModalOpen
+  );
+
+  // Touch swipe gesture: swiping right from the left edge triggers back navigation, matching the top back button
+  useSwipeBack({
+    onBack: handleBack,
+    enabled: menuState !== "main" && !isAnyDrawerOpen
+  });
 
   return (
     <div className="fixed inset-0 bg-[#F0ECE1] flex items-center justify-center font-sans text-slate-800 overflow-hidden overscroll-none">
