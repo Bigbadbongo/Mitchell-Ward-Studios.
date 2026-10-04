@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Share2, CheckCircle, Plus, X, ZoomIn, Sparkles } from "lucide-react";
+import ZoomableModal from "./ZoomableModal";
 
 // Parse size text (e.g. "1m x 1m", "60cm x 70cm", "100x100") to width and height in cm
 function parseSizeToCm(sizeString: string): { width: number; height: number } {
@@ -317,31 +318,19 @@ export default function ArtworkDetailView({
       </div>
 
       {/* --- THE FULL SCREEN PROJECTOR --- */}
-      {isMagnified && (
-        <div className="fixed top-0 left-0 w-full h-[100dvh] z-[100] bg-black/95 flex items-center justify-center animate-in fade-in duration-200 backdrop-blur-md">
-          
-          <button 
-            onClick={() => setIsMagnified(false)}
-            className="absolute top-4 right-4 sm:top-6 sm:right-6 p-3 sm:p-4 bg-white/10 text-white rounded-full hover:bg-white/20 transition-colors z-[101]"
-          >
-            <X className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-          
-          <div className="relative w-full h-[100dvh] p-4 flex items-center justify-center overflow-hidden" onClick={() => setIsMagnified(false)}>
-            <img 
-              src={currentSlide === "main" ? selectedArtwork.src : selectedArtwork.secondarySrc} 
-              alt={selectedArtwork.title} 
-              className="max-w-full max-h-full object-contain select-none z-10"
-              draggable={false}
-              onContextMenu={e => e.preventDefault()} 
-            />
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.25] select-none overflow-hidden z-20">
-              <span className="text-3xl md:text-5xl font-black rotate-[-35deg] text-white whitespace-nowrap tracking-widest drop-shadow-md">© MITCHELL WARD STUDIOS</span>
-            </div>
-          </div>
-
-        </div>
-      )}
+      <ZoomableModal
+        isOpen={isMagnified}
+        onClose={() => setIsMagnified(false)}
+        title={selectedArtwork.title}
+      >
+        <img 
+          src={currentSlide === "main" ? selectedArtwork.src : selectedArtwork.secondarySrc} 
+          alt={selectedArtwork.title} 
+          className="max-w-[92vw] max-h-[85vh] object-contain select-none z-10 block pointer-events-none"
+          draggable={false}
+          onContextMenu={e => e.preventDefault()} 
+        />
+      </ZoomableModal>
     </>
   );
 }

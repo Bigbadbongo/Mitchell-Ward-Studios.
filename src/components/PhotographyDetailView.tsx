@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Share2, CheckCircle, Plus, X, ZoomIn, FileDown, Sparkles } from "lucide-react";
+import ZoomableModal from "./ZoomableModal";
 
 // Generates frame styles (color, wood grain, gold gradient, shadows) dynamically
 function getFrameStyles(chosenFrame: string, frameStyle: string) {
@@ -294,22 +295,13 @@ export default function PhotographyDetailView({
         </div>
       </div>
 
-      {isMagnified && (
-        <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center animate-in fade-in duration-200 backdrop-blur-md">
-          <button 
-            onClick={() => setIsMagnified(false)}
-            className="absolute top-6 right-6 p-4 bg-white/10 text-white rounded-full hover:bg-white/20 transition-colors z-[101]"
-          >
-            <X className="w-6 h-6" />
-          </button>
-          <div className="relative w-full h-full p-4 flex items-center justify-center overflow-hidden" onClick={() => setIsMagnified(false)}>
-            <FramedComposite maxH="85vh" />
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.25] select-none overflow-hidden z-20">
-              <span className="text-3xl md:text-5xl font-black rotate-[-35deg] text-white whitespace-nowrap tracking-widest drop-shadow-md">© MITCHELL WARD STUDIOS</span>
-            </div>
-          </div>
-        </div>
-      )}
+      <ZoomableModal
+        isOpen={isMagnified}
+        onClose={() => setIsMagnified(false)}
+        title={selectedArtwork.title}
+      >
+        <FramedComposite maxH="85vh" />
+      </ZoomableModal>
     </>
   );
 }
