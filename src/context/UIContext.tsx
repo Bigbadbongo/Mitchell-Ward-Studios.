@@ -23,6 +23,8 @@ interface UIContextType {
   triggerToast: (msg: string) => NodeJS.Timeout;
   activeCategory: string | null;
   setActiveCategory: (cat: string | null) => void;
+  selectedMainCollection: string | null;
+  setSelectedMainCollection: (col: string | null) => void;
   selectedSubCategory: string | null;
   setSelectedSubCategory: (sub: string | null) => void;
   handleBack: () => void;
@@ -43,6 +45,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null); 
+  const [selectedMainCollection, setSelectedMainCollection] = useState<string | null>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
 
   const triggerToast = (msg: string) => {
@@ -57,15 +60,48 @@ export function UIProvider({ children }: { children: ReactNode }) {
     }
     else if (menuState === 'clients') setMenuState('admin');
     else if (menuState === 'orders') setMenuState('admin');
-    else if (menuState === 'admin_collections') setMenuState('admin');
-    else if (menuState === 'admin_list') setMenuState('admin_collections');
+    else if (menuState === 'admin_collections') {
+      setMenuState('admin');
+      setActiveCategory(null);
+      setSelectedMainCollection(null);
+      setSelectedSubCategory(null);
+    }
+    else if (menuState === 'admin_subcollections') {
+      setMenuState('admin_collections');
+      setSelectedMainCollection(null);
+      setSelectedSubCategory(null);
+    }
+    else if (menuState === 'admin_list') {
+      if (selectedMainCollection) {
+        setMenuState('admin_subcollections');
+      } else {
+        setMenuState('admin_collections');
+      }
+      setSelectedSubCategory(null);
+    }
     else if (menuState === 'detail') {
-      if (!selectedSubCategory) setMenuState('collections');
-      else setMenuState('list');
+      if (selectedSubCategory) setMenuState('list');
+      else if (selectedMainCollection) setMenuState('subcollections');
+      else setMenuState('collections');
     } 
-    else if (menuState === 'list') setMenuState('collections');
+    else if (menuState === 'list') {
+      if (selectedMainCollection) {
+        setMenuState('subcollections');
+      } else {
+        setMenuState('collections');
+      }
+      setSelectedSubCategory(null);
+    }
+    else if (menuState === 'subcollections') {
+      setMenuState('collections');
+      setSelectedMainCollection(null);
+      setSelectedSubCategory(null);
+    }
     else if (menuState === 'collections') {
-      setMenuState('main'); setActiveCategory(null); setSelectedSubCategory(null);
+      setMenuState('main'); 
+      setActiveCategory(null); 
+      setSelectedMainCollection(null);
+      setSelectedSubCategory(null);
     }
   };
 
@@ -75,6 +111,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
     if (menuState !== "main" && menuState !== "admin") {
       setMenuState(isAdmin ? "admin" : "main");
       setActiveCategory(null);
+      setSelectedMainCollection(null);
       setSelectedSubCategory(null);
       return;
     }
@@ -106,6 +143,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
       clickCount, setClickCount,
       toastMessage, triggerToast,
       activeCategory, setActiveCategory,
+      selectedMainCollection, setSelectedMainCollection,
       selectedSubCategory, setSelectedSubCategory,
       handleBack, handleTitleClick
     }}>

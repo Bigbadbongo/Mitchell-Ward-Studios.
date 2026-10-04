@@ -1,22 +1,58 @@
 import React from "react";
-import { X, Instagram, Facebook, Globe, Mail, MapPin, Palette } from "lucide-react";
+import { X, Instagram, Globe, Mail, MapPin, Palette } from "lucide-react";
+import { Browser } from "@capacitor/browser";
 import { useUI } from "../context/UIContext";
-import { useInventory } from "../context/InventoryContext";
 
-export default function StudioPanelDrawer() {
-  const { isStudioPanelOpen, setIsStudioPanelOpen } = useUI();
-  const { studioBio, studioEmail } = useInventory();
+interface StudioPanelDrawerProps {
+  isStudioPanelOpen?: boolean;
+  setIsStudioPanelOpen?: (open: boolean) => void;
+  studioBio?: string;
+  studioEmail?: string;
+  studioInstagram?: string;
+  studioWebsite?: string;
+}
 
-  if (!isStudioPanelOpen) return null;
+export default function StudioPanelDrawer({
+  isStudioPanelOpen: propIsOpen,
+  setIsStudioPanelOpen: propSetIsOpen,
+  studioBio: propBio,
+  studioEmail: propEmail,
+  studioInstagram: propInstagram,
+  studioWebsite: propWebsite,
+}: StudioPanelDrawerProps) {
+  const ui = useUI();
+
+  const isOpen = propIsOpen !== undefined ? propIsOpen : ui.isStudioPanelOpen;
+  const setIsOpen = propSetIsOpen || ui.setIsStudioPanelOpen;
+
+  if (!isOpen) return null;
+
+  const handleOpenUrl = async (rawUrl: string) => {
+    if (!rawUrl) return;
+    let url = rawUrl.trim();
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      url = `https://${url}`;
+    }
+    try {
+      if (typeof window !== "undefined" && (window as any).Capacitor) {
+        await Browser.open({ url });
+      } else {
+        window.open(url, "_blank");
+      }
+    } catch (err) {
+      console.error("Error opening URL:", err);
+      window.open(url, "_blank");
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsStudioPanelOpen(false)}></div>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsOpen(false)}></div>
       <div className="bg-[#fafafa] h-[92%] md:h-auto md:max-h-[92vh] w-full md:w-[600px] md:max-w-3xl rounded-t-3xl md:rounded-3xl flex flex-col shadow-2xl animate-in slide-in-from-bottom-full md:zoom-in-95 duration-300 overflow-hidden relative z-10">
         
         {/* Floating Close Button */}
         <button 
-          onClick={() => setIsStudioPanelOpen(false)} 
+          onClick={() => setIsOpen(false)}
           className="absolute top-6 right-6 z-20 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/40 transition-colors shadow-lg border border-white/10"
         >
           <X className="w-5 h-5"/>
@@ -57,7 +93,7 @@ export default function StudioPanelDrawer() {
                 <Palette className="w-4 h-4" /> About the Artist
               </h3>
               <p className="text-[15px] text-slate-700 leading-relaxed whitespace-pre-line font-medium px-2 border-l-2 border-[#2A0845]">
-                {studioBio}
+                {propBio || "Welcome to Mitchell Ward Studios."}
               </p>
             </div>
 
@@ -65,13 +101,25 @@ export default function StudioPanelDrawer() {
             <div>
               <h3 className="font-black text-xs uppercase tracking-widest text-slate-400 mb-3">Connect & Follow</h3>
               <div className="grid grid-cols-2 gap-3">
-                <button className="flex flex-col items-center justify-center gap-2 p-5 bg-white rounded-2xl shadow-sm border border-stone-200 hover:border-[#2A0845] hover:shadow-md transition-all group active:scale-95">
-                  <Instagram className="w-6 h-6 text-slate-400 group-hover:text-[#E1306C] transition-colors" />
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-[#2A0845]">Instagram</span>
+                <button
+                  onClick={() => propInstagram && handleOpenUrl(propInstagram)}
+                  disabled={!propInstagram}
+                  className={`flex flex-col items-center justify-center gap-2 p-5 bg-white rounded-2xl shadow-sm border border-stone-200 transition-all group active:scale-95 ${propInstagram ? "hover:border-[#2A0845] hover:shadow-md cursor-pointer" : "opacity-50 cursor-not-allowed"}`}
+                >
+                  <Instagram className={`w-6 h-6 transition-colors ${propInstagram ? "text-slate-400 group-hover:text-[#E1306C]" : "text-slate-300"}`} />
+                  <span className={`text-[10px] font-bold uppercase tracking-widest ${propInstagram ? "text-slate-500 group-hover:text-[#2A0845]" : "text-slate-300"}`}>
+                    {propInstagram ? "Instagram" : "No Instagram"}
+                  </span>
                 </button>
-                <button className="flex flex-col items-center justify-center gap-2 p-5 bg-white rounded-2xl shadow-sm border border-stone-200 hover:border-[#2A0845] hover:shadow-md transition-all group active:scale-95">
-                  <Globe className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-[#2A0845]">Website</span>
+                <button
+                  onClick={() => propWebsite && handleOpenUrl(propWebsite)}
+                  disabled={!propWebsite}
+                  className={`flex flex-col items-center justify-center gap-2 p-5 bg-white rounded-2xl shadow-sm border border-stone-200 transition-all group active:scale-95 ${propWebsite ? "hover:border-[#2A0845] hover:shadow-md cursor-pointer" : "opacity-50 cursor-not-allowed"}`}
+                >
+                  <Globe className={`w-6 h-6 transition-colors ${propWebsite ? "text-slate-400 group-hover:text-blue-500" : "text-slate-300"}`} />
+                  <span className={`text-[10px] font-bold uppercase tracking-widest ${propWebsite ? "text-slate-500 group-hover:text-[#2A0845]" : "text-slate-300"}`}>
+                    {propWebsite ? "Website" : "No Website"}
+                  </span>
                 </button>
               </div>
             </div>
@@ -86,7 +134,7 @@ export default function StudioPanelDrawer() {
               </p>
               
               <a 
-                href={`mailto:${studioEmail}`} 
+                href={`mailto:${propEmail || "mitchellwardstudios@gmail.com"}`}
                 className="inline-flex items-center gap-2 bg-white text-[#2A0845] px-5 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-stone-100 transition-colors shadow-sm active:scale-95"
               >
                 <Mail className="w-4 h-4" /> Message Studio

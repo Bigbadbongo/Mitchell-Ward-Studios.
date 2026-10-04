@@ -14,6 +14,7 @@ export const uploadArtworkService = async ({
   uploadTitle,
   uploadDesc,
   uploadPrice,
+  uploadMainCollection,
   uploadCatName
 }: any) => {
   let imageUrl = "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?auto=format&fit=crop&w=300&q=80";
@@ -84,12 +85,17 @@ export const uploadArtworkService = async ({
     : (uploadType === "Photography" ? "Multiple Sizes" : "Unknown Size");
 
   await addDoc(collection(db, "artworks"), {
-    title: uploadTitle || "Untitled Work", description: uploadDesc || "Fresh from the studio.",
-    category: uploadType, subcategory: uploadCatName, src: imageUrl,
+    title: uploadTitle || "Untitled Work", 
+    description: uploadDesc || "Fresh from the studio.",
+    category: uploadType, 
+    mainCollection: uploadMainCollection || (uploadType === "Paintings" ? "Studio Pieces" : "Studio Selections"),
+    subcategory: uploadCatName || "General", 
+    src: imageUrl,
     thumbnailSrc: thumbnailUrl || imageUrl,
     highResStoragePath: highResStoragePath,
     secondarySrc: secondaryUrl || null,
-    isSold: false, isVaulted: false,
+    isSold: false, 
+    isVaulted: false,
     price: uploadType === "Paintings" ? Number(uploadPrice) || 0 : 0, 
     size: formattedSize,
     widthCm: widthCm || null,

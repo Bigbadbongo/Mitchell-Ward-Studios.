@@ -9,3 +9,5 @@ coverage/
 node-env/
 .idea/
 *.iml
+
+.firebase/

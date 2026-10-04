@@ -8,6 +8,7 @@ export default function AppHeader() {
     handleBack, 
     handleTitleClick, 
     activeCategory, 
+    selectedMainCollection,
     selectedSubCategory, 
     setIsAdminSettingsOpen 
   } = useUI();
@@ -38,9 +39,13 @@ export default function AppHeader() {
           ) : menuState === "admin" ? "Studio Manager" 
             : menuState === "clients" ? "Client Manager"
             : menuState === "orders" ? "Sales Ledger"
-            : menuState === "admin_collections" ? "Manage " + activeCategory 
-            : menuState === "admin_list" ? "Folder: " + selectedSubCategory 
+            : menuState === "admin_collections" ? ("Manage " + (activeCategory || "Collections"))
+            : menuState === "admin_subcollections" ? (`${activeCategory} • ${selectedMainCollection || "Sub-Galleries"}`)
+            : menuState === "admin_list" ? (selectedSubCategory === "Unassigned" ? "Unassigned Artworks" : (selectedMainCollection ? `${selectedMainCollection} / ${selectedSubCategory}` : selectedSubCategory))
             : menuState === "detail" ? "Art Details" 
+            : menuState === "collections" ? (activeCategory || "Collections")
+            : menuState === "subcollections" ? (selectedMainCollection || "Sub-Galleries")
+            : menuState === "list" ? (selectedSubCategory || "Artworks")
             : (selectedSubCategory || activeCategory)}
         </h2>
       </div>          

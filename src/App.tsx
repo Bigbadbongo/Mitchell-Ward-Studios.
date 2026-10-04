@@ -14,7 +14,9 @@ import ReturnsPolicyModal from "./components/ReturnsPolicyModal";
 import ArtworkGridView from "./components/ArtworkGridView";
 import AdminArtworkListView from "./components/AdminArtworkListView";
 import CollectionsView from "./components/CollectionsView";
+import SubCollectionsView from "./components/SubCollectionsView";
 import AdminCollectionsView from "./components/AdminCollectionsView";
+import AdminSubCollectionsView from "./components/AdminSubCollectionsView";
 import AdminClientsView from "./components/AdminClientsView";
 import AdminOrdersView from "./components/AdminOrdersView";
 import MainMenuView from "./components/MainMenuView";
@@ -45,8 +47,20 @@ export default function App() {
           {engine.menuState === "admin_collections" && (
             <AdminCollectionsView 
               activeCategory={engine.activeCategory}
+              activeCollections={engine.activeCollections}
+              inventory={engine.inventory}
               openUploadModal={engine.openUploadModal}
-              currentActiveFolderList={engine.currentActiveFolderList}
+              setSelectedMainCollection={engine.setSelectedMainCollection}
+              setSelectedSubCategory={engine.setSelectedSubCategory}
+              setMenuState={engine.setMenuState}
+              setIsAdminSettingsOpen={engine.setIsAdminSettingsOpen}
+            />
+          )}
+
+          {engine.menuState === "admin_subcollections" && (
+            <AdminSubCollectionsView 
+              selectedMainCollection={engine.selectedMainCollection}
+              activeSubGalleries={engine.activeSubGalleries}
               setSelectedSubCategory={engine.setSelectedSubCategory}
               setMenuState={engine.setMenuState}
             />
@@ -56,6 +70,9 @@ export default function App() {
             <AdminArtworkListView 
               adminListToRender={engine.adminListToRender}
               setAdminSelectedArt={engine.setAdminSelectedArt}
+              selectedMainCollection={engine.selectedMainCollection}
+              selectedSubCategory={engine.selectedSubCategory}
+              setMenuState={engine.setMenuState}
             />
           )}
 
@@ -69,13 +86,27 @@ export default function App() {
 
           {engine.menuState === "collections" && (
             <CollectionsView 
-              currentActiveFolderList={engine.currentActiveFolderList}
+              activeCollections={engine.activeCollections}
               activeCategory={engine.activeCategory}
-              getCollectionCover={engine.getCollectionCover}
+              getMainCollectionCover={engine.getMainCollectionCover}
+              setSelectedMainCollection={engine.setSelectedMainCollection}
+              setMenuState={engine.setMenuState}
+              handleSurpriseMe={engine.handleSurpriseMe}
+              isCurating={engine.isCurating}
+            />
+          )}
+
+          {engine.menuState === "subcollections" && (
+            <SubCollectionsView 
+              activeSubGalleries={engine.activeSubGalleries}
+              selectedMainCollection={engine.selectedMainCollection}
+              activeCategory={engine.activeCategory}
+              getSubGalleryCover={engine.getSubGalleryCover}
               setSelectedSubCategory={engine.setSelectedSubCategory}
               setMenuState={engine.setMenuState}
               handleSurpriseMe={engine.handleSurpriseMe}
               isCurating={engine.isCurating}
+              inventory={engine.inventory}
             />
           )}
 
@@ -136,14 +167,18 @@ export default function App() {
         
         <UploadArtworkDrawer
           isUploading={engine.isUploading} setIsUploading={engine.setIsUploading} uploadType={engine.uploadType}
-          uploadTitle={engine.uploadTitle} setUploadTitle={engine.setUploadTitle} uploadCatName={engine.uploadCatName}
-          setUploadCatName={engine.setUploadCatName} paintCats={engine.paintCats} photoCats={engine.photoCats}
+          uploadTitle={engine.uploadTitle} setUploadTitle={engine.setUploadTitle} 
+          uploadMainCollection={engine.uploadMainCollection} setUploadMainCollection={engine.setUploadMainCollection}
+          uploadCatName={engine.uploadCatName} setUploadCatName={engine.setUploadCatName} 
+          paintingsCollections={engine.paintingsCollections} photographyCollections={engine.photographyCollections}
+          paintCats={engine.paintCats} photoCats={engine.photoCats}
           uploadWidth={engine.uploadWidth} setUploadWidth={engine.setUploadWidth} uploadHeight={engine.uploadHeight}
           setUploadHeight={engine.setUploadHeight} uploadUnit={engine.uploadUnit} setUploadUnit={engine.setUploadUnit}
           uploadPrice={engine.uploadPrice} setUploadPrice={engine.setUploadPrice}
           uploadDesc={engine.uploadDesc} setUploadDesc={engine.setUploadDesc} handleFileChange={engine.handleFileChange}
           handlePrintFileChange={engine.handlePrintFileChange} handleSecondaryFileChange={engine.handleSecondaryFileChange}
           uploadingToCloud={engine.uploadingToCloud} handlePublishUpload={engine.handlePublishUpload}
+          handleAddMainCollection={engine.handleAddMainCollection} handleAddSubGallery={engine.handleAddSubGallery}
         />
 
         <StudioPanelDrawer 
@@ -151,6 +186,8 @@ export default function App() {
           setIsStudioPanelOpen={engine.setIsStudioPanelOpen}
           studioBio={engine.studioBio}
           studioEmail={engine.studioEmail}
+          studioInstagram={engine.studioInstagram}
+          studioWebsite={engine.studioWebsite}
         />
 
         <AccountDrawer 
@@ -167,6 +204,8 @@ export default function App() {
         <AdminItemManager 
           adminSelectedArt={engine.adminSelectedArt}
           setAdminSelectedArt={engine.setAdminSelectedArt}
+          paintingsCollections={engine.paintingsCollections}
+          photographyCollections={engine.photographyCollections}
           paintCats={engine.paintCats}
           photoCats={engine.photoCats}
           moveArtworkLocation={engine.moveArtworkLocation}
@@ -181,7 +220,20 @@ export default function App() {
           setStudioBio={engine.setStudioBio}
           studioEmail={engine.studioEmail}
           setStudioEmail={engine.setStudioEmail}
+          studioInstagram={engine.studioInstagram}
+          setStudioInstagram={engine.setStudioInstagram}
+          studioWebsite={engine.studioWebsite}
+          setStudioWebsite={engine.setStudioWebsite}
           saveStudioInfo={engine.saveStudioInfo}
+          paintingsCollections={engine.paintingsCollections}
+          photographyCollections={engine.photographyCollections}
+          handleAddMainCollection={engine.handleAddMainCollection}
+          handleRenameMainCollection={engine.handleRenameMainCollection}
+          handleDeleteMainCollection={engine.handleDeleteMainCollection}
+          handleAddSubGallery={engine.handleAddSubGallery}
+          handleRenameSubGallery={engine.handleRenameSubGallery}
+          handleDeleteSubGallery={engine.handleDeleteSubGallery}
+          inventory={engine.inventory}
           paintCats={engine.paintCats}
           photoCats={engine.photoCats}
           editFolder={engine.editFolder}

@@ -1,8 +1,15 @@
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 
-export const moveArtworkLocationService = async (artworkId, newSubcategory) => {
-  await updateDoc(doc(db, "artworks", artworkId), { subcategory: newSubcategory });
+export const moveArtworkLocationService = async (
+  artworkId: string,
+  newCollection: string,
+  newSubcategory: string
+) => {
+  await updateDoc(doc(db, "artworks", artworkId), {
+    mainCollection: newCollection,
+    subcategory: newSubcategory
+  });
 };
 
 export const toggleArtworkStatusService = async (

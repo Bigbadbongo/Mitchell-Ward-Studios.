@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.mitchellward.artgallery',
-  appName: 'Art Gallery & Mockup Viewer',
+  appName: 'Mitchell Ward Studios',
   webDir: 'dist',
   server: {
     androidScheme: 'https',
